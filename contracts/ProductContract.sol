@@ -5,11 +5,14 @@ import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 
-contract ProductContract is ERC1155, Ownable, ERC2771Recipient {
+contract ProductContract is ERC1155, Ownable {
     mapping(uint256 => uint256) public hardCap;
     mapping(uint256 => uint256) public totalSupply;
 
     // uri example: "https://example.com/api/token/{id}.json"
+    // constructor(string memory _uri, address forwarder) ERC1155(_uri) {
+    //     _setTrustedForwarder(forwarder);
+    // }
     constructor(string memory _uri) ERC1155(_uri) {}
 
     function mintNewToken(

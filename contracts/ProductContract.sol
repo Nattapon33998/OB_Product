@@ -3,8 +3,9 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/token/ERC1155/ERC1155.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@opengsn/contracts/src/ERC2771Recipient.sol";
 
-contract ProductContract is ERC1155, Ownable {
+contract ProductContract is ERC1155, Ownable, ERC2771Recipient {
     mapping(uint256 => uint256) public hardCap;
     mapping(uint256 => uint256) public totalSupply;
 

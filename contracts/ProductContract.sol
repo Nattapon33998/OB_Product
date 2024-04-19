@@ -6,8 +6,9 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@opengsn/contracts/src/ERC2771Recipient.sol";
 
 contract ProductContract is ERC1155, Ownable {
-    mapping(uint256 => uint256) public hardCap;
-    mapping(uint256 => uint256) public totalSupply;
+    mapping(uint256 => uint256) private hardCap;
+    mapping(uint256 => uint256) private tokenSupply;
+    mapping(uint256 => string) private tokenUri;
 
     // uri example: "https://example.com/api/token/{id}.json"
     // constructor(string memory _uri, address forwarder) ERC1155(_uri) {
@@ -18,16 +19,18 @@ contract ProductContract is ERC1155, Ownable {
     function mintNewToken(
         uint256 tokenId,
         uint256 amount,
+        string memory uri,
         bytes memory data
     ) external onlyOwner {
         if (hardCap[tokenId] > 0) {
             require(
-                totalSupply[tokenId] + amount <= hardCap[tokenId],
+                tokenSupply[tokenId] + amount <= hardCap[tokenId],
                 "Exceeds hard cap for this token ID"
             );
         }
         _mint(msg.sender, tokenId, amount, data);
-        totalSupply[tokenId] += amount;
+        tokenSupply[tokenId] += amount;
+        tokenUri[tokenId] = uri;
     }
 
     function mintExistingToken(
@@ -36,12 +39,12 @@ contract ProductContract is ERC1155, Ownable {
     ) external onlyOwner {
         if (hardCap[tokenId] > 0) {
             require(
-                totalSupply[tokenId] + amount <= hardCap[tokenId],
+                tokenSupply[tokenId] + amount <= hardCap[tokenId],
                 "Exceeds hard cap for this token ID"
             );
         }
         _mint(msg.sender, tokenId, amount, "");
-        totalSupply[tokenId] += amount;
+        tokenSupply[tokenId] += amount;
     }
 
     function burn(
@@ -62,9 +65,23 @@ contract ProductContract is ERC1155, Ownable {
 
     function setHardCap(uint256 tokenId, uint256 cap) external onlyOwner {
         require(
-            cap >= totalSupply[tokenId],
+            cap >= tokenSupply[tokenId],
             "New cap less than current supply"
         );
         hardCap[tokenId] = cap;
+    }
+
+    function getHardCap(uint256 tokenId) external view returns (uint256) {
+        return hardCap[tokenId];
+    }
+
+    function getTokenSupply(uint256 tokenId) external view returns (uint256) {
+        return tokenSupply[tokenId];
+    }
+
+    function getTokenUri(
+        uint256 tokenId
+    ) external view returns (string memory) {
+        return tokenUri[tokenId];
     }
 }
